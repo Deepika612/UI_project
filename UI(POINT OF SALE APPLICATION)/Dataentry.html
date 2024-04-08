@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Point of Sale Application</title>
+    <link rel="stylesheet" href="Dataentry.css">
+    <script src="Dataentry.js"></script>
+    <script>
+        function temp() {
+            var pid = document.getElementById("productid").value
+            var units = document.getElementById("units").value
+
+            if(pid === "" || units === "") {
+                alert("Fill the data properly")
+                return
+            }
+
+            addInventory(pid, units)
+
+            document.getElementById("productid").value="";
+            document.getElementById("units").value="";
+        }
+
+        function add(products, j) {
+            var table = document.getElementById("table");
+            var row = table.insertRow(j+1);
+            var cell1 = row.insertCell(0);
+            var cell2 = row.insertCell(1);
+            var cell3 = row.insertCell(2);
+            var cell4 = row.insertCell(3);
+            var cell5 = row.insertCell(4);
+            var cell6 = row.insertCell(5);
+            cell1.innerHTML = products[j].pid
+            cell2.innerHTML = products[j].qty
+            cell3.innerHTML = products[j].name
+            cell4.innerHTML = products[j].unitprice
+            cell5.innerHTML = products[j].tax
+            cell6.innerHTML = products[j].line_total
+        }
+
+        function update(products, k) {
+            document.getElementById("table").deleteRow(k+1);
+            var table = document.getElementById("table");
+            var row = table.insertRow(k+1);
+            var cell1 = row.insertCell(0);
+            var cell2 = row.insertCell(1);
+            var cell3 = row.insertCell(2);
+            var cell4 = row.insertCell(3);
+            var cell5 = row.insertCell(4);
+            var cell6 = row.insertCell(5);
+            cell1.innerHTML = products[k].pid
+            cell2.innerHTML = products[k].qty
+            cell3.innerHTML = products[k].name
+            cell4.innerHTML = products[k].unitprice
+            cell5.innerHTML = products[k].tax
+            cell6.innerHTML = products[k].line_total
+        }
+
+        var t
+
+        function grand_total(total) {
+            document.getElementById("tot").innerHTML = total
+            t = total
+        }
+
+        var ones = new Array("", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine");
+        var tens = new Array("", "Ten", "Twenty", "Thirty", "Fourty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninty")
+        var extra = new Array("", "Eleven", "Tweleve", "Thirteen", "Fourteen", "Fivteen", "Sixteen", "Seventeen", "Eighteen", "Ninteen")
+
+
+        function converter(num) {
+            var str = num.toString()
+            console.log(str)
+            str = str.split('').reverse().join('')
+            var ans = ""
+            if(str.length == 5 && str.charAt(4)=='1' && str.charAt(3)!='0'){
+                var c = parseInt(str.charAt(3))
+                ans = ans + " " + extra[c] + " thousand"
+            }else{
+                if(str.length >= 5){
+                    var c = parseInt(str.charAt(4))
+                    if(c!=0){
+                        ans = ans + tens[c];
+                    }
+                }
+                if(str.length >= 4){
+                    var c = parseInt(str.charAt(3))
+                    if(c!=0){
+                        ans = ans + " " + ones[c] + " thousand";
+                    }else if(str.length == 5){
+                        ans = ans + " thousand"
+                    }
+                }
+            }
+            if(str.length >= 3){
+                var c = parseInt(str.charAt(2))
+                if(c!=0){
+                    ans = ans + " " + ones[c]+ " hundred";
+                }
+            }
+            if(str.length >=2 && str.charAt(1)=='1' && str.charAt(0)!='0'){
+                var c = parseInt(str.charAt(0))
+                ans = ans + " " + extra[c]
+            }else{
+                if(str.length >=2) {
+                    var c = parseInt(str.charAt(1))
+                    if(c!=0){
+                        ans = ans + " " + tens[c];
+                    }
+                }
+                if(str.length >= 1){
+                    var c = parseInt(str.charAt(0))
+                    if(c!=0){
+                        ans = ans + " " + ones[c];
+                    }
+                }
+            }
+            return ans
+        }
+
+        function Generatebill() {
+            newWin = window.open("","","width=500,height=500")
+            newWin.document.open()
+            newWin.document.write("<html><head><title>Generate Bill</title><link rel='stylesheet' href='bill.css'></head>");
+            newWin.document.write("<body><div class='container'><h1>ACME GROCERS</h1>");
+            var b = new Date()
+            newWin.document.write("<h3 id='bill_no'>Bill Number - B"+ Math.round(Math.random()*1000) +"</h3>")
+            var arrWeek = new Array("Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat")
+            newWin.document.write("<h3 id='bill_no'>Date : "+ b.getDate()+"-"+(b.getMonth()+1)+"-"+(b.getFullYear())+"  "+arrWeek[b.getDay()] + " "+ b.toLocaleTimeString() +"</h3>")
+            var products = getObject()
+            newWin.document.write("<table id='table'><thead><th>S No.</th><th>PName</th><th>Qty</th><th>Price</th></thead><hr><tbody>")
+            for(var i=0;i<products.length;i++){
+                newWin.document.write("<tr><th>"+(i+1)+"</th><th>"+products[i].name+"</th><th>"+products[i].qty+"</th><th>"+products[i].line_total+"</th></tr>")
+            }
+            var word = converter(t)
+            newWin.document.write("</tbody></table><br><br><br><div class='total'><h4 id='grand'>Grand total</h4><h4 id='tot'>"+ t +"</h4><h4 id='word'>"+ word +" only </h4></div></div><body></html>");
+            newWin.document.close()
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>ACME GROCERS</h1>
+        <br><br><br>
+        <table id="table">
+            <thead>
+                <th id="pid">Pid</th>
+                <th id="qty">Qty</th>
+                <th id="name">Name</th>
+                <th id="unitprice">UnitPrice</th>
+                <th id="tax">Tax</th>
+                <th id="line Total">Total</th>
+            </thead>
+            <hr>
+            <tbody>
+                <tr>
+                    <td><input type="text" id="productid"></td>
+                    <td><input type="number" id="units" onblur="temp()"></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+            </tbody>
+        </table>
+        <br><br><br>
+        <div class="total">
+            <h3 id="grand">Grand total</h3>
+            <h3 id="tot"></h3>
+        </div>
+        <br><br><br><br>
+        <div class="bills">
+            <input type="button" value="Generate Bill" onclick="Generatebill()">
+        </div>
+    </div>
+</body>
+</html>
